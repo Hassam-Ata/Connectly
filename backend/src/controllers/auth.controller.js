@@ -141,7 +141,7 @@ export async function onboarding(req, res) {
       userId,
       {
         ...req.body,
-        isOnboared: true,
+        isOnboarded: true,
       },
       { new: true }
     );
