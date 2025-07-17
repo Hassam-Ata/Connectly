@@ -61,7 +61,7 @@ export async function signup(req, res) {
     res.cookie("jwt", token, {
       maxAge: 7 * 24 * 60 * 60 * 1000,
       httpOnly: true, // prevent XSS attacks,
-      sameSite: "None", // prevent CSRF attacks
+      sameSite: "lax", // prevent CSRF attacks
       secure: process.env.NODE_ENV === "production",
     });
 
@@ -95,7 +95,7 @@ export async function login(req, res) {
     res.cookie("jwt", token, {
       maxAge: 7 * 24 * 60 * 60 * 1000,
       httpOnly: true, // prevent XSS attacks,
-      sameSite: "None", // prevent CSRF attacks
+      sameSite: "lax", // prevent CSRF attacks
       secure: process.env.NODE_ENV === "production",
     });
 
@@ -109,8 +109,8 @@ export async function login(req, res) {
 export function logout(req, res) {
   res.clearCookie("jwt", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "None",
+    secure: true, // required with SameSite: "None"
+    sameSite: "none", // allows cross-site cookies
   });
   res.status(200).json({ success: true, message: "Logout successful" });
 }
