@@ -2,7 +2,6 @@ import express from "express";
 import "dotenv/config";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import path from "path";
 
 import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
@@ -12,12 +11,11 @@ import { connectDB } from "./lib/db.js";
 
 const app = express();
 const PORT = process.env.PORT;
-
-const __dirname = path.resolve();
+const NODE_ENV = process.env.NODE_ENV;
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.FRONTEND_URL,
     credentials: true, // allow frontend to send cookies
   })
 );
@@ -29,15 +27,23 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/chat", chatRoutes);
 
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+const startServer = async () => {
+  try {
+    await connectDB();
 
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
-  });
-}
+    // listen for local development
+    if (NODE_ENV !== "production") {
+      app.listen(PORT, () =>
+        console.log("Server is up and running on PORT:", PORT)
+      );
+    }
+  } catch (error) {
+    console.error("Failed to start server:", error.message);
+    process.exit(1);
+  }
+};
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  connectDB();
-});
+startServer();
+
+// export for vercel
+export default app;
